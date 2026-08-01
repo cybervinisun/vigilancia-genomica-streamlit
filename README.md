@@ -1,6 +1,6 @@
 # 📊 Vigilância Genômica e Epidemiológica — Dashboards
 
-Dashboards interativos para visualização de dados de vigilância epidemiológica de arboviroses (dengue, chikungunya, zika) no Brasil, com dados reais e ao vivo via API pública do [InfoDengue](https://info.dengue.mat.br/) (parceria Fiocruz/FGV).
+Dashboards interativos para visualização de dados de vigilância epidemiológica de arboviroses (dengue, chikungunya, zika) no Brasil, com dados reais em "tempo real" via API pública do [InfoDengue](https://info.dengue.mat.br/) (parceria Fiocruz/FGV).
 
 Pequeno projeto desenvolvido como demonstração de habilidades em ciência de dados aplicada à saúde pública, integrando visualização interativa, consumo de APIs e comparação entre frameworks (Python/Streamlit e R/Shiny).
 
@@ -13,7 +13,7 @@ Pequeno projeto desenvolvido como demonstração de habilidades em ciência de d
 
 ## 📁 Estrutura do repositório
 
-- `app_vigilancia_real.py` — dashboard Streamlit com dados reais em "tempo real" (lag semanal) extraídos via API InfoDengue (série temporal, incidência por 100k habitantes, nível de alerta por cidade).
+- `app_vigilancia_real.py` — dashboard Streamlit com dados reais em "tempo real" (lag semanal) extraídos via API pública do InfoDengue (série temporal, incidência por 100k habitantes, nível de alerta por cidade).
 - `app.R` — versão equivalente em R/Shiny do dashboard acima, usando os mesmos dados e a mesma fonte.
 - `app.py` — exemplo/protótipo com dados sintéticos de compostos químicos, ilustrando a mesma estrutura de painel aplicada a outro domínio (triagem de candidatos a fármacos).
 - `gerar_dados_exemplo.py` — script que gera o dataset sintético usado no `app.py`.
