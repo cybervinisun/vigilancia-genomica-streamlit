@@ -1,0 +1,7 @@
+version: 2
+updates:
+  # Dependências Python (requirements.txt) do dashboard Streamlit
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
