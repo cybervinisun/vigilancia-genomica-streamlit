@@ -23,27 +23,8 @@ jobs:
       - name: Gerar dados de exemplo
         run: python gerar_dados_exemplo.py
 
-      - name: Smoke test — app.py (dados sintéticos)
-        run: |
-          streamlit run app.py --server.headless true --server.port 8501 &
-          PID=$!
-          for i in $(seq 1 15); do
-            curl -sf http://localhost:8501/_stcore/health && break
-            sleep 1
-          done
-          curl -sf http://localhost:8501/_stcore/health
-          kill $PID
-
-      - name: Smoke test — app_vigilancia_real.py (API InfoDengue ao vivo)
-        run: |
-          streamlit run app_vigilancia_real.py --server.headless true --server.port 8502 &
-          PID=$!
-          for i in $(seq 1 15); do
-            curl -sf http://localhost:8502/_stcore/health && break
-            sleep 1
-          done
-          curl -sf http://localhost:8502/_stcore/health
-          kill $PID
+      - name: Smoke test — executa os apps de ponta a ponta (AppTest)
+        run: python scripts/smoke_test.py
 
   check-syntax-r:
     runs-on: ubuntu-latest

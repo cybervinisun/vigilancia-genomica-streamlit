@@ -41,7 +41,7 @@ Dados públicos e em tempo real via [API do InfoDengue](https://info.dengue.mat.
 
 ## 🔄 Manutenção automatizada
 
-- **CI** (`.github/workflows/ci.yml`): a cada push/PR, instala as dependências e sobe cada app em modo headless para garantir que nada quebrou.
+- **CI** (`.github/workflows/ci.yml`): a cada push/PR, instala as dependências e executa cada app de ponta a ponta via [`streamlit.testing.v1.AppTest`](https://docs.streamlit.io/develop/api-reference/app-testing) (`scripts/smoke_test.py`) — inclui a chamada real à API do InfoDengue, então pega tanto erro de código quanto mudança/indisponibilidade da API externa em todo push, não só na checagem semanal.
 - **Dependabot** (`.github/dependabot.yml`): abre PRs semanais de atualização das dependências Python e das GitHub Actions.
 - **Auto-merge** (`.github/workflows/dependabot-auto-merge.yml`): PRs do Dependabot que sejam patch/minor e passem na CI são mesclados automaticamente; atualizações major ficam para revisão manual.
 - **Monitor da API** (`.github/workflows/infodengue-monitor.yml`): checagem semanal (segunda-feira) validando se a API do InfoDengue ainda responde no formato esperado; abre uma Issue automaticamente se algo mudar.
