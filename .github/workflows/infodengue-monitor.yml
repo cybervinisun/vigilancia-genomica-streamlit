@@ -1,4 +1,4 @@
-name: Monitor API InfoDengue
+name: Monitor externo (API InfoDengue + apps publicados)
 
 on:
   schedule:
@@ -52,6 +52,66 @@ jobs:
                 "",
                 "Possíveis causas: API fora do ar, formato do CSV mudou (colunas renomeadas/removidas),",
                 "ou mudança na URL/parâmetros do endpoint.",
+                "",
+                `Ver execução: ${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`,
+              ].join("\n"),
+            });
+
+  check-apps-online:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checar se os dashboards publicados respondem
+        id: check
+        run: |
+          declare -A APPS=(
+            ["Streamlit Community Cloud"]="https://vigilancia-genomica-app-vvnutarygmjpgvncuxkvrw.streamlit.app"
+            ["Posit Connect Cloud"]="https://connect.posit.cloud/bestaceleste/content/019fb8f5-6865-c13d-1c62-a77447b59fe9"
+          )
+          FALHAS=""
+          for NOME in "${!APPS[@]}"; do
+            URL="${APPS[$NOME]}"
+            HTTP_CODE=$(curl -sL --max-redirs 10 -c /tmp/cookies.txt -b /tmp/cookies.txt -o /dev/null -w "%{http_code}" --max-time 20 "$URL" || echo "erro_conexao")
+            rm -f /tmp/cookies.txt
+            echo "$NOME -> HTTP $HTTP_CODE"
+            if [ "$HTTP_CODE" -ge 400 ] 2>/dev/null || [ "$HTTP_CODE" = "erro_conexao" ]; then
+              FALHAS="$FALHAS- $NOME ($URL): HTTP $HTTP_CODE\n"
+            fi
+          done
+          if [ -n "$FALHAS" ]; then
+            printf 'detalhe=%b' "$FALHAS" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+      - name: Abrir issue se algum app estiver fora do ar
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const label = "apps-monitor";
+            const { owner, repo } = context.repo;
+            const detalhe = `${{ steps.check.outputs.detalhe }}` || "(sem detalhe capturado)";
+
+            const existing = await github.rest.issues.listForRepo({
+              owner, repo, state: "open", labels: label,
+            });
+            if (existing.data.length > 0) return;
+
+            await github.rest.issues.create({
+              owner, repo,
+              title: "🔴 Um dos dashboards publicados não respondeu",
+              labels: [label],
+              body: [
+                "O workflow semanal `infodengue-monitor` (job `check-apps-online`) detectou que",
+                "pelo menos um dos dashboards publicados (README) não respondeu com sucesso:",
+                "",
+                detalhe,
+                "",
+                "Este check só confirma se a URL responde (pega queda total da plataforma, DNS,",
+                "ou app removido) -- não executa o app de verdade, então não pega uma exceção",
+                "acontecendo dentro do script depois que a página carrega (o Streamlit Community",
+                "Cloud serve a casca estática do app via HTTP antes de rodar o script via WebSocket,",
+                "então um `curl` não enxerga esse estágio). Hibernação normal por inatividade não",
+                "deve disparar esse alerta, pois a página de wake-up também responde 200.",
                 "",
                 `Ver execução: ${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`,
               ].join("\n"),
