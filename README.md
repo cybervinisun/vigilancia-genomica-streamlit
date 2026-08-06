@@ -1,5 +1,8 @@
 # 📊 Vigilância Genômica e Epidemiológica — Dashboards
 
+[![CI](https://github.com/cybervinisun/vigilancia-genomica-streamlit/actions/workflows/ci.yml/badge.svg)](https://github.com/cybervinisun/vigilancia-genomica-streamlit/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 Dashboards interativos para visualização de dados de vigilância epidemiológica de arboviroses (dengue, chikungunya, zika) no Brasil, com dados reais em "tempo real" via API pública do [InfoDengue](https://info.dengue.mat.br/) (parceria Fiocruz/FGV).
 
 Pequeno projeto desenvolvido como demonstração de habilidades em ciência de dados aplicada à saúde pública, integrando visualização interativa, consumo de APIs e comparação entre frameworks (Python/Streamlit e R/Shiny).
@@ -36,9 +39,20 @@ shiny::runApp("app.R")
 
 Dados públicos e em tempo real via [API do InfoDengue](https://info.dengue.mat.br/services/api/doc) (parceria Fiocruz / FGV EMAp).
 
+## 🔄 Manutenção automatizada
+
+- **CI** (`.github/workflows/ci.yml`): a cada push/PR, instala as dependências e sobe cada app em modo headless para garantir que nada quebrou.
+- **Dependabot** (`.github/dependabot.yml`): abre PRs semanais de atualização das dependências Python e das GitHub Actions.
+- **Auto-merge** (`.github/workflows/dependabot-auto-merge.yml`): PRs do Dependabot que sejam patch/minor e passem na CI são mesclados automaticamente; atualizações major ficam para revisão manual.
+- **Monitor da API** (`.github/workflows/infodengue-monitor.yml`): checagem semanal (segunda-feira) validando se a API do InfoDengue ainda responde no formato esperado; abre uma Issue automaticamente se algo mudar.
+
 ## 🧰 Stack
 
 `Python` · `R` · `Streamlit` · `Shiny` · `Plotly` · `ggplot2` · `Pandas` · `dplyr`
+
+## 📄 Licença
+
+Distribuído sob a licença [MIT](LICENSE).
 
 ---
 

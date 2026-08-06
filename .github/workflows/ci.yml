@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  smoke-test-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Gerar dados de exemplo
+        run: python gerar_dados_exemplo.py
+
+      - name: Smoke test — app.py (dados sintéticos)
+        run: |
+          streamlit run app.py --server.headless true --server.port 8501 &
+          PID=$!
+          for i in $(seq 1 15); do
+            curl -sf http://localhost:8501/_stcore/health && break
+            sleep 1
+          done
+          curl -sf http://localhost:8501/_stcore/health
+          kill $PID
+
+      - name: Smoke test — app_vigilancia_real.py (API InfoDengue ao vivo)
+        run: |
+          streamlit run app_vigilancia_real.py --server.headless true --server.port 8502 &
+          PID=$!
+          for i in $(seq 1 15); do
+            curl -sf http://localhost:8502/_stcore/health && break
+            sleep 1
+          done
+          curl -sf http://localhost:8502/_stcore/health
+          kill $PID
+
+  check-syntax-r:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+
+      - name: Verificar sintaxe do app.R
+        run: Rscript -e 'parse("app.R"); cat("OK: app.R sem erros de sintaxe\n")'

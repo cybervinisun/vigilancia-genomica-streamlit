@@ -1,0 +1,58 @@
+name: Monitor API InfoDengue
+
+on:
+  schedule:
+    - cron: "0 12 * * 1" # toda segunda-feira, 12:00 UTC
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  check-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Consultar API e validar colunas esperadas
+        id: check
+        run: |
+          URL="https://info.dengue.mat.br/api/alertcity?geocode=3304557&disease=dengue&format=csv&ew_start=1&ew_end=53&ey_start=2025&ey_end=2026"
+          HTTP_CODE=$(curl -s -o /tmp/resp.csv -w "%{http_code}" "$URL")
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "detalhe=API retornou HTTP $HTTP_CODE em vez de 200." >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+          HEADER=$(head -n1 /tmp/resp.csv)
+          for COL in casos casos_est p_inc100k nivel data_iniSE; do
+            if ! echo "$HEADER" | grep -q "$COL"; then
+              echo "detalhe=Coluna esperada '$COL' não encontrada. Cabeçalho recebido: $HEADER" >> "$GITHUB_OUTPUT"
+              exit 1
+            fi
+          done
+
+      - name: Abrir issue se a checagem falhou
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const label = "infodengue-monitor";
+            const { owner, repo } = context.repo;
+
+            const existing = await github.rest.issues.listForRepo({
+              owner, repo, state: "open", labels: label,
+            });
+            if (existing.data.length > 0) return;
+
+            await github.rest.issues.create({
+              owner, repo,
+              title: "🔴 API do InfoDengue parece ter mudado ou está indisponível",
+              labels: [label],
+              body: [
+                "O workflow semanal `infodengue-monitor` detectou uma falha ao consultar a API",
+                "pública do InfoDengue usada por `app_vigilancia_real.py`.",
+                "",
+                "Possíveis causas: API fora do ar, formato do CSV mudou (colunas renomeadas/removidas),",
+                "ou mudança na URL/parâmetros do endpoint.",
+                "",
+                `Ver execução: ${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`,
+              ].join("\n"),
+            });
