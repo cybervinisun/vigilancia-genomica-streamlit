@@ -1,0 +1,33 @@
+name: Manter apps acordados
+
+# O Streamlit Community Cloud hiberna apps sem tráfego. Este workflow abre os
+# dashboards num navegador headless a cada 8 horas e clica em "acordar" se for
+# preciso, para quem clicar no link (recrutadores, portfólio) nunca cair na
+# tela "This app has gone to sleep".
+
+on:
+  schedule:
+    - cron: "17 */8 * * *" # a cada 8 horas (minuto 17 para evitar o pico do minuto 0)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  keep-awake:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar Playwright
+        run: |
+          pip install playwright==1.48.0
+          python -m playwright install --with-deps chromium
+
+      - name: Visitar e acordar os dashboards
+        run: python scripts/keep_awake.py
