@@ -12,10 +12,14 @@ cidade com try/except e mostra um st.error() em vez de estourar, então
 uma checagem só de at.exception não pegaria a API fora do ar.
 """
 import sys
+from pathlib import Path
 
 from streamlit.testing.v1 import AppTest
 
-APPS = ["app.py", "app_vigilancia_real.py"]
+# Desde o Streamlit 1.66, AppTest.from_file() resolve caminhos relativos a
+# partir do arquivo que o chama (scripts/), não do diretório atual.
+RAIZ = Path(__file__).resolve().parent.parent
+APPS = [str(RAIZ / "app.py"), str(RAIZ / "app_vigilancia_real.py")]
 
 falhou = False
 for caminho in APPS:
