@@ -45,6 +45,7 @@ Dados públicos e em tempo real via [API do InfoDengue](https://info.dengue.mat.
 - **Dependabot** (`.github/dependabot.yml`): abre PRs semanais de atualização das dependências Python e das GitHub Actions.
 - **Auto-merge** (`.github/workflows/dependabot-auto-merge.yml`): PRs do Dependabot que sejam patch/minor e passem na CI são mesclados automaticamente; atualizações major ficam para revisão manual.
 - **Monitor externo** (`.github/workflows/infodengue-monitor.yml`): checagem semanal (segunda-feira) com dois jobs — um valida se a API do InfoDengue ainda responde no formato esperado, outro confirma se os dois dashboards publicados (Streamlit Community Cloud e Posit Connect Cloud) ainda respondem; qualquer um abre uma Issue automaticamente se falhar.
+- **Manter acordado** (`.github/workflows/keep-awake.yml` + `scripts/keep_awake.py`): a cada 8 horas abre os dois dashboards num navegador headless (Playwright) e clica em "acordar" se o Streamlit Community Cloud tiver hibernado o app por inatividade, para que o link publicado nunca caia na tela "This app has gone to sleep".
 
 ## 🧰 Stack
 
